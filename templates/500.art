@@ -1,0 +1,8 @@
+{{extend './layout.art'}}
+
+{{block 'title'}}500, broken{{/block}}
+
+{{block 'content'}}
+<h1>something is broken, sry, but it seems bad</h1>
+<p>😎</p>
+{{/block}}

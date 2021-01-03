@@ -76,7 +76,7 @@ fastify.get('/last', async (req, reply) => {
   });
 
   if (result.builds.length === 0) {
-    return reply.callNotFound();
+    throw fastify.httpErrors.notFound();
   }
 
   return reply.redirect(`/build/${result.builds[0].buildSlug}`);
@@ -90,7 +90,7 @@ fastify.get('/build/:buildSlug', async (req, reply) => {
     return reply.view('./build.art', { build });
   } catch {}
 
-  return reply.callNotFound();
+  throw fastify.httpErrors.notFound();
 });
 
 fastify.post('/build/:buildSlug/abort', async (req, reply) => {
@@ -106,11 +106,16 @@ fastify.post('/build/:buildSlug/abort', async (req, reply) => {
     return reply.redirect(`/build/${build.slug}`);
   } catch (e) {}
 
-  return reply.callNotFound();
+  throw fastify.httpErrors.notFound();
 });
 
 fastify.setNotFoundHandler((req, reply) => {
   reply.code(404).view('./404.art');
+});
+
+fastify.setErrorHandler((error, req, reply) => {
+  this.log.error(error);
+  reply.code(error.statusCode || 500).view('./500.art');
 });
 
 const start = async () => {
