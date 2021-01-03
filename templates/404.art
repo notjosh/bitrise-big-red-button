@@ -1,0 +1,8 @@
+{{extend './layout.art'}}
+
+{{block 'title'}}404, not found{{/block}}
+
+{{block 'content'}}
+<h1>404, not found</h1>
+<p>😎</p>
+{{/block}}

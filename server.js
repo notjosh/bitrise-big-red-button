@@ -1,6 +1,7 @@
 'use strict';
 
 require('dotenv').config();
+const path = require('path');
 const bitrise = require('@lifeomic/bitrise');
 const fastify = require('fastify')({ logger: true });
 
@@ -19,12 +20,16 @@ const buildForSlug = (buildSlug) => {
   });
 };
 
+fastify.register(require('fastify-sensible'));
 fastify.register(require('fastify-formbody'));
 fastify.register(require('point-of-view'), {
   engine: {
     'art-template': require('art-template'),
   },
   templates: 'templates',
+});
+fastify.register(require('fastify-static'), {
+  root: path.join(__dirname, 'public'),
 });
 
 fastify.get('/', async (req, reply) => {
@@ -79,31 +84,33 @@ fastify.get('/last', async (req, reply) => {
 
 fastify.get('/build/:buildSlug', async (req, reply) => {
   const builder = buildForSlug(req.params.buildSlug);
-  const build = await builder.describe();
 
-  if (build == null) {
-    return reply.callNotFound();
-  }
+  try {
+    const build = await builder.describe();
+    return reply.view('./build.art', { build });
+  } catch {}
 
-  return reply.view('./build.art', { build });
+  return reply.callNotFound();
 });
 
 fastify.post('/build/:buildSlug/abort', async (req, reply) => {
   const builder = buildForSlug(req.params.buildSlug);
-  const build = await builder.describe();
-
-  if (build == null) {
-    return reply.callNotFound();
-  }
 
   try {
+    const build = await builder.describe();
     await builder.abort({
       reason: 'cancelled via big red button',
       skipNotifications: true,
     });
+
+    return reply.redirect(`/build/${build.slug}`);
   } catch (e) {}
 
-  return reply.redirect(`/build/${build.slug}`);
+  return reply.callNotFound();
+});
+
+fastify.setNotFoundHandler((req, reply) => {
+  reply.code(404).view('./404.art');
 });
 
 const start = async () => {
