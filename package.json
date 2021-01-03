@@ -1,0 +1,7 @@
+{
+  "name": "bitrise-big-red-button",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Joshua May <notjosh@gmail.com>",
+  "license": "MIT"
+}
