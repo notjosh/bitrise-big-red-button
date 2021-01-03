@@ -1,0 +1,20 @@
+{{extend './layout.art'}}
+
+{{block 'content'}}
+<div>
+  <form method="POST" action="/new-build">
+    <button type="submit">make a new build</button>
+  </form>
+</div>
+
+{{if builds.length > 0}}
+<h1>recent builds</h1>
+<ul>
+  {{each builds}}
+  <li>
+    <a href="/build/{{ $value.slug }}">build #{{ $value.build_number }}</a>
+  </li>
+  {{/each}}
+</ul>
+{{/if}}
+{{/block}}

@@ -1,0 +1,36 @@
+{{extend './layout.art'}}
+
+{{block 'content'}}
+<p>
+  <a href="/">home</a>
+</p>
+
+{{if build.status <= 1}}
+<div>
+  <form method="POST" action="/build/{{ build.slug }}/abort">
+    <button type="submit">abort build</button>
+  </form>
+</div>
+{{/if}}
+
+<h1>build #{{ build.build_number }}</h1>
+<dl>
+  <dt>slug</dt>
+  <dd>
+    <a href="https://app.bitrise.io/build/{{ build.slug }}">{{ build.slug }}</a>
+  </dd>
+  <dt>branch</dt>
+  <dd>{{ build.branch }}</dd>
+  <dt>triggered_workflow</dt>
+  <dd>{{ build.triggered_workflow }}</dd>
+  <dt>status</dt>
+  <dd>{{ build.status }}</dd>
+  <dt>status_text</dt>
+  <dd>{{ build.status_text }}</dd>
+  <dt>triggered_at</dt>
+  <dd>{{ build.triggered_at }}</dd>
+  <dt>finished_at</dt>
+  <dd>{{ build.finished_at }}</dd>
+</dl>
+
+{{/block}}

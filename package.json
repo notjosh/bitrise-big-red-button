@@ -3,5 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "author": "Joshua May <notjosh@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@lifeomic/bitrise": "^0.9.0",
+    "art-template": "^4.13.2",
+    "dotenv": "^8.2.0",
+    "fastify": "^3.9.2",
+    "fastify-formbody": "^5.0.0",
+    "point-of-view": "^4.7.0"
+  }
 }
