@@ -27,7 +27,9 @@ const buildForSlug = (buildSlug) => {
   });
 };
 
-fastify.register(require('fastify-helmet'));
+fastify.register(require('fastify-helmet'), {
+  contentSecurityPolicy: process.env.NODE_ENV !== 'development',
+});
 fastify.register(require('fastify-cookie'));
 fastify.register(require('./src/fastify-auth-cookie-to-bearer'), {
   name: 'token',
@@ -248,7 +250,10 @@ fastify.setErrorHandler((error, req, reply) => {
 
 const start = async () => {
   try {
-    await fastify.listen(process.env.PORT || 3000);
+    await fastify.listen({
+      host: process.env.NODE_ENV === 'development' ? '127.0.0.1' : '::',
+      port: process.env.PORT || 3000,
+    });
     fastify.log.info(`server listening on ${fastify.server.address().port}`);
   } catch (err) {
     fastify.log.error(err);

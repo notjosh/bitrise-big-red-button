@@ -9,7 +9,7 @@
     "yarn": "1.x"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@lifeomic/bitrise": "^0.9.0",
