@@ -2,6 +2,9 @@
 
 require('dotenv').config();
 const path = require('path');
+const querystring = require('querystring');
+const url = require('url');
+
 const bitrise = require('@lifeomic/bitrise');
 const fastify = require('fastify')({ logger: true });
 
@@ -24,6 +27,7 @@ const buildForSlug = (buildSlug) => {
   });
 };
 
+fastify.register(require('fastify-helmet'));
 fastify.register(require('fastify-cookie'));
 fastify.register(require('./src/fastify-auth-cookie-to-bearer'), {
   name: 'token',
@@ -51,7 +55,7 @@ fastify.register(require('fastify-oauth2'), {
     },
   },
   startRedirectPath: '/login',
-  callbackUri: 'http://localhost:3000/login/callback',
+  callbackUri: `${process.env.PROJECT_URL}login/callback`,
 });
 fastify.register(require('fastify-auth0-verify'), {
   domain: `https://${process.env.AUTH0_DOMAIN}/`,
@@ -205,11 +209,11 @@ fastify.get('/login/callback', async (req, reply) => {
   await req.jwtVerify();
 
   reply.setCookie('token', token.id_token, {
-    // domain: 'your.domain',
+    domain: process.env.PROJECT_DOMAIN,
     path: '/',
-    // secure: true, // send cookie over HTTPS only
+    secure: process.env.NODE_ENV !== 'development',
     httpOnly: true,
-    // sameSite: true, // enabling this means the homepage cookie doesn't work until reloading the tab?
+    sameSite: 'lax',
   });
 
   reply.redirect('/');
@@ -218,16 +222,12 @@ fastify.get('/login/callback', async (req, reply) => {
 fastify.get('/logout', (req, reply) => {
   reply.clearCookie('token', { path: '/' });
 
-  //   fastify.server.address().port;
-  const returnTo = req.protocol + '://' + req.hostname;
-  const url = require('url');
-  const querystring = require('querystring');
   const logoutURL = new url.URL(
     `https://${process.env.AUTH0_DOMAIN}/v2/logout`
   );
   const searchString = querystring.stringify({
     client_id: process.env.AUTH0_CLIENT_ID,
-    returnTo: returnTo,
+    returnTo: process.env.PROJECT_URL,
   });
   logoutURL.search = searchString;
 
@@ -239,7 +239,6 @@ fastify.setNotFoundHandler((req, reply) => {
 });
 
 fastify.setErrorHandler((error, req, reply) => {
-  console.log('xxx', { error, reply });
   fastify.log.error(error);
   reply.view('./error.art', {
     message: error.message,
@@ -249,7 +248,7 @@ fastify.setErrorHandler((error, req, reply) => {
 
 const start = async () => {
   try {
-    await fastify.listen(3000);
+    await fastify.listen(process.env.port || 3000);
     fastify.log.info(`server listening on ${fastify.server.address().port}`);
   } catch (err) {
     fastify.log.error(err);

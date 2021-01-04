@@ -4,6 +4,13 @@
   "main": "index.js",
   "author": "Joshua May <notjosh@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": "14.x",
+    "yarn": "1.x"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "@lifeomic/bitrise": "^0.9.0",
     "art-template": "^4.13.2",
@@ -12,6 +19,7 @@
     "fastify-auth0-verify": "^0.4.0",
     "fastify-cookie": "^5.1.0",
     "fastify-formbody": "^5.0.0",
+    "fastify-helmet": "^5.0.3",
     "fastify-oauth2": "^4.2.1",
     "fastify-sensible": "^3.1.0",
     "fastify-static": "^3.3.0",
