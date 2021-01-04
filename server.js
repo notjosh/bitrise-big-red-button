@@ -248,7 +248,7 @@ fastify.setErrorHandler((error, req, reply) => {
 
 const start = async () => {
   try {
-    await fastify.listen(process.env.port || 3000);
+    await fastify.listen(process.env.PORT || 3000);
     fastify.log.info(`server listening on ${fastify.server.address().port}`);
   } catch (err) {
     fastify.log.error(err);
