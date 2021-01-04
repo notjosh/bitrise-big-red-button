@@ -1,0 +1,5 @@
+{{extend './layout.art'}}
+
+{{block 'content'}}
+<h1>who are you?</h1>
+{{/block}}

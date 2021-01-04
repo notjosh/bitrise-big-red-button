@@ -14,6 +14,19 @@
     <link rel="manifest" href="/site.webmanifest" />
   </head>
   <body>
+    {{if user == null}}
+    <ul>
+      <li><a href="/login">log in</a></li>
+    </ul>
+    {{else}}
+    <p>hi {{ user.name }}</p>
+    <div><img src="{{ user.picture }}" /></div>
+    <ul>
+      <li><a href="/me">me</a></li>
+      <li><a href="/logout">log out</a></li>
+    </ul>
+    {{/if}}
+
     {{block 'content'}}{{/block}}
   </body>
 </html>

@@ -9,6 +9,10 @@ const client = bitrise({ token: process.env.BITRISE_TOKEN }).app({
   slug: process.env.BITRISE_APP_SLUG,
 });
 
+const identities = process.env.ALLOWED_IDENTITIES.split(',')
+  .map((s) => s.trim())
+  .filter((s) => s !== '');
+
 const buildForSlug = (buildSlug) => {
   const builder = require('@lifeomic/bitrise/src/build');
 
@@ -20,6 +24,35 @@ const buildForSlug = (buildSlug) => {
   });
 };
 
+fastify.register(require('fastify-cookie'));
+fastify.register(require('./src/fastify-auth-cookie-to-bearer'), {
+  name: 'token',
+});
+fastify.register(require('fastify-static'), {
+  root: path.join(__dirname, 'public'),
+});
+fastify.register(require('fastify-oauth2'), {
+  name: 'auth0',
+  scope: ['openid', 'profile', 'name', 'picture'],
+  credentials: {
+    client: {
+      id: process.env.AUTH0_CLIENT_ID,
+      secret: process.env.AUTH0_CLIENT_SECRET,
+    },
+    auth: {
+      tokenHost: `https://${process.env.AUTH0_DOMAIN}/`,
+      authorizePath: '/authorize',
+      tokenPath: '/oauth/token',
+    },
+  },
+  startRedirectPath: '/login',
+  callbackUri: 'http://localhost:3000/login/callback',
+});
+fastify.register(require('fastify-auth0-verify'), {
+  domain: `https://${process.env.AUTH0_DOMAIN}/`,
+  secret: process.env.AUTH0_CLIENT_SECRET,
+  audience: process.env.AUTH0_CLIENT_ID,
+});
 fastify.register(require('fastify-sensible'));
 fastify.register(require('fastify-formbody'));
 fastify.register(require('point-of-view'), {
@@ -28,11 +61,27 @@ fastify.register(require('point-of-view'), {
   },
   templates: 'templates',
 });
-fastify.register(require('fastify-static'), {
-  root: path.join(__dirname, 'public'),
+
+fastify.addHook('preHandler', function (req, reply, done) {
+  reply.locals = {
+    user: req.user,
+  };
+
+  done();
 });
 
 fastify.get('/', async (req, reply) => {
+  try {
+    // total hack, to allow single endpoit to be both auth'd and non
+    await fastify.authenticate(req, reply);
+  } catch (error) {
+    // console.log(error);
+  }
+
+  if (req.user == null) {
+    return reply.view('./whoareyou.art');
+  }
+
   const result = await client.listBuilds({
     sort_by: 'created_at',
     status: 0,
@@ -42,71 +91,144 @@ fastify.get('/', async (req, reply) => {
     (result.builds || []).map(async (build) => await build.describe())
   );
 
-  return reply.view('./index.art', { builds });
+  return reply.view('./home.art', { builds, user: req.user });
 });
 
-fastify.post('/new-build', async (req, reply) => {
-  const existingBuilds = await client.listBuilds({
-    status: 0, // "not finished"
-    sort_by: 'created_at',
-    limit: 5,
-  });
+const authenticated = (fastify, options, done) => {
+  fastify.post(
+    '/new-build',
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      const existingBuilds = await client.listBuilds({
+        status: 0, // "not finished"
+        sort_by: 'created_at',
+        limit: 5,
+      });
 
-  for (let i = 0; i < existingBuilds.builds.length; i += 1) {
-    let build = existingBuilds.builds[i];
+      for (let i = 0; i < existingBuilds.builds.length; i += 1) {
+        let build = existingBuilds.builds[i];
 
-    await build.abort({
-      reason: 'obsolete, running new build via big red button',
-      skipNotifications: true,
-    });
+        await build.abort({
+          reason: 'obsolete, running new build via big red button',
+          skipNotifications: true,
+        });
+      }
+
+      const { buildSlug } = await client.triggerBuild({
+        branch: 'main',
+        workflow: 'primary',
+      });
+
+      return reply.redirect(`/build/${buildSlug}`);
+    }
+  );
+
+  fastify.get(
+    '/last',
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      const result = await client.listBuilds({
+        sort_by: 'created_at',
+        limit: 1,
+      });
+
+      if (result.builds.length === 0) {
+        throw fastify.httpErrors.notFound();
+      }
+
+      return reply.redirect(`/build/${result.builds[0].buildSlug}`);
+    }
+  );
+
+  fastify.get(
+    '/build/:buildSlug',
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      const builder = buildForSlug(req.params.buildSlug);
+
+      try {
+        const build = await builder.describe();
+        return reply.view('./build.art', { build });
+      } catch {}
+
+      throw fastify.httpErrors.notFound();
+    }
+  );
+
+  fastify.post(
+    '/build/:buildSlug/abort',
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      const builder = buildForSlug(req.params.buildSlug);
+
+      try {
+        const build = await builder.describe();
+        await builder.abort({
+          reason: 'cancelled via big red button',
+          skipNotifications: true,
+        });
+
+        return reply.redirect(`/build/${build.slug}`);
+      } catch (e) {}
+
+      throw fastify.httpErrors.notFound();
+    }
+  );
+
+  fastify.get(
+    '/me',
+    { preValidation: [fastify.authenticate] },
+    async (req, reply) => {
+      return reply.view('./me.art');
+    }
+  );
+  done();
+};
+
+fastify.register(authenticated);
+
+fastify.get('/login/callback', async (req, reply) => {
+  const token = await fastify.auth0.getAccessTokenFromAuthorizationCodeFlow(
+    req
+  );
+
+  req.injectToken(token.id_token);
+
+  const decoded = req.jwtDecode();
+  if (!identities.includes(decoded.sub)) {
+    throw fastify.httpErrors.unauthorized();
   }
 
-  const { buildSlug } = await client.triggerBuild({
-    branch: 'main',
-    workflow: 'primary',
+  await req.jwtVerify();
+
+  reply.setCookie('token', token.id_token, {
+    // domain: 'your.domain',
+    path: '/',
+    // secure: true, // send cookie over HTTPS only
+    httpOnly: true,
+    // sameSite: true, // enabling this means the homepage cookie doesn't work until reloading the tab?
   });
 
-  return reply.redirect(`/build/${buildSlug}`);
+  reply.redirect('/');
 });
 
-fastify.get('/last', async (req, reply) => {
-  const result = await client.listBuilds({
-    sort_by: 'created_at',
-    limit: 1,
+fastify.get('/logout', (req, reply) => {
+  reply.clearCookie('token', { path: '/' });
+
+  //   fastify.server.address().port;
+  const returnTo = req.protocol + '://' + req.hostname;
+  const url = require('url');
+  const querystring = require('querystring');
+  const logoutURL = new url.URL(
+    `https://${process.env.AUTH0_DOMAIN}/v2/logout`
+  );
+  const searchString = querystring.stringify({
+    client_id: process.env.AUTH0_CLIENT_ID,
+    returnTo: returnTo,
   });
+  logoutURL.search = searchString;
 
-  if (result.builds.length === 0) {
-    throw fastify.httpErrors.notFound();
-  }
-
-  return reply.redirect(`/build/${result.builds[0].buildSlug}`);
-});
-
-fastify.get('/build/:buildSlug', async (req, reply) => {
-  const builder = buildForSlug(req.params.buildSlug);
-
-  try {
-    const build = await builder.describe();
-    return reply.view('./build.art', { build });
-  } catch {}
-
-  throw fastify.httpErrors.notFound();
-});
-
-fastify.post('/build/:buildSlug/abort', async (req, reply) => {
-  const builder = buildForSlug(req.params.buildSlug);
-
-  try {
-    const build = await builder.describe();
-    await builder.abort({
-      reason: 'cancelled via big red button',
-      skipNotifications: true,
-    });
-
-    return reply.redirect(`/build/${build.slug}`);
-  } catch (e) {}
-
-  throw fastify.httpErrors.notFound();
+  reply.redirect(logoutURL.toString());
 });
 
 fastify.setNotFoundHandler((req, reply) => {
