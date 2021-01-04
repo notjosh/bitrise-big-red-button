@@ -3,7 +3,7 @@
 {{block 'content'}}
 <div class="boxy build">
   <form method="POST" action="/new-build">
-    <button type="submit">make a new build</button>
+    <button type="submit" class="big-red-button"></button>
   </form>
 </div>
 

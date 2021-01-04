@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/modern-css-reset/reset.min.css" />
     <link rel="stylesheet" href="/style.css" />
   </head>
-  <body>
+  <body ontouchstart="">
     <div id="friends">
       <div id="auth">
         {{if user == null}}

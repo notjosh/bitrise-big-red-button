@@ -91,3 +91,50 @@ a.button {
   -moz-appearance: button;
   appearance: button;
 }
+
+/* via https://codepad.co/snippet/big-red-button */
+.big-red-button {
+  box-shadow: 0px 15px 0 20px #352d2d, 0px 40px 0 30px #000000;
+  cursor: pointer;
+  background-color: #c0392b;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 60px;
+  transform: translateX(0%);
+  color: white;
+  margin: 100px 60px;
+}
+
+.big-red-button::before {
+  content: '';
+  z-index: 1;
+  border-radius: 50%;
+  background-color: #e74c3c;
+  position: absolute;
+  bottom: 100%;
+  left: 0%;
+  transition: bottom 0.4s;
+  width: 180px;
+  height: 60px;
+}
+
+.big-red-button::after {
+  content: '';
+  background-color: #c0392b;
+  position: absolute;
+  bottom: 50%;
+  left: 0%;
+  width: 180px;
+  height: 60px;
+  transition: height 0.4s;
+}
+
+.big-red-button:active::before {
+  bottom: 10%;
+}
+
+.big-red-button:active::after {
+  height: 10%;
+}
