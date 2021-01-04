@@ -223,7 +223,13 @@ fastify.get('/login/callback', async (req, reply) => {
 });
 
 fastify.get('/logout', (req, reply) => {
-  reply.clearCookie('token', { path: '/' });
+  reply.clearCookie('token', {
+    domain: process.env.PROJECT_DOMAIN,
+    path: '/',
+    secure: process.env.NODE_ENV !== 'development',
+    httpOnly: true,
+    sameSite: 'lax',
+  });
 
   const logoutURL = new url.URL(
     `https://${process.env.AUTH0_DOMAIN}/v2/logout`
