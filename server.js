@@ -31,6 +31,11 @@ fastify.register(require('./src/fastify-auth-cookie-to-bearer'), {
 fastify.register(require('fastify-static'), {
   root: path.join(__dirname, 'public'),
 });
+fastify.register(require('fastify-static'), {
+  root: path.join(__dirname, 'node_modules/modern-css-reset/dist'),
+  prefix: '/modern-css-reset/',
+  decorateReply: false,
+});
 fastify.register(require('fastify-oauth2'), {
   name: 'auth0',
   scope: ['openid', 'profile', 'name', 'picture'],
@@ -53,7 +58,7 @@ fastify.register(require('fastify-auth0-verify'), {
   secret: process.env.AUTH0_CLIENT_SECRET,
   audience: process.env.AUTH0_CLIENT_ID,
 });
-fastify.register(require('fastify-sensible'));
+fastify.register(require('fastify-sensible'), { errorHandler: false });
 fastify.register(require('fastify-formbody'));
 fastify.register(require('point-of-view'), {
   engine: {
@@ -74,9 +79,7 @@ fastify.get('/', async (req, reply) => {
   try {
     // total hack, to allow single endpoit to be both auth'd and non
     await fastify.authenticate(req, reply);
-  } catch (error) {
-    // console.log(error);
-  }
+  } catch (error) {}
 
   if (req.user == null) {
     return reply.view('./whoareyou.art');
@@ -236,8 +239,12 @@ fastify.setNotFoundHandler((req, reply) => {
 });
 
 fastify.setErrorHandler((error, req, reply) => {
-  this.log.error(error);
-  reply.code(error.statusCode || 500).view('./500.art');
+  console.log('xxx', { error, reply });
+  fastify.log.error(error);
+  reply.view('./error.art', {
+    message: error.message,
+    statusCode: reply.statusCode,
+  });
 });
 
 const start = async () => {

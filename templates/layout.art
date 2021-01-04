@@ -12,21 +12,23 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="stylesheet" href="/modern-css-reset/reset.min.css" />
+    <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    {{if user == null}}
-    <ul>
-      <li><a href="/login">log in</a></li>
-    </ul>
-    {{else}}
-    <p>hi {{ user.name }}</p>
-    <div><img src="{{ user.picture }}" /></div>
-    <ul>
-      <li><a href="/me">me</a></li>
-      <li><a href="/logout">log out</a></li>
-    </ul>
-    {{/if}}
+    <div id="friends">
+      <div id="auth">
+        {{if user == null}}
+        <p><a href="/login">log in</a></p>
+        {{else}}
+        <p>
+          hi <strong>{{ user.name }}</strong> (<a href="/logout">log out</a>)
+        </p>
+        {{/if}}
+      </div>
 
-    {{block 'content'}}{{/block}}
+      <div id="content">{{block 'content'}}{{/block}}</div>
+    </div>
   </body>
 </html>

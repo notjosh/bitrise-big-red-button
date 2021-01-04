@@ -1,0 +1,144 @@
+html {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+em {
+  background: linear-gradient(
+    to right,
+    rgba(150, 246, 238, 1),
+    rgba(18, 146, 222, 1)
+  );
+  padding: 2pt;
+}
+
+strong {
+  background: linear-gradient(90deg, #00c9ff 0%, #92fe9d 100%);
+  padding: 2pt;
+}
+
+#friends {
+}
+
+#auth {
+  margin: 10pt 20pt;
+}
+
+#content {
+  margin: 10pt 20pt;
+}
+
+dt::after {
+  content: ':';
+}
+
+dl.inline dt {
+  display: inline-block;
+  margin: 2pt 0;
+  padding: 2pt;
+  font-weight: bold;
+}
+
+dl.inline dt:nth-of-type(1) {
+  background: linear-gradient(
+    90deg,
+    rgba(254, 165, 149, 1) 0%,
+    rgba(249, 153, 47, 1) 35%,
+    rgba(0, 212, 255, 1) 100%
+  );
+}
+
+dl.inline dt:nth-of-type(2) {
+  background: linear-gradient(
+    90deg,
+    rgba(149, 254, 155, 1) 0%,
+    rgba(0, 212, 255, 1) 40%,
+    rgba(249, 242, 47, 1) 100%
+  );
+}
+
+dl.inline dt:nth-of-type(3) {
+  background: linear-gradient(
+    to right,
+    rgba(156, 172, 223, 1),
+    rgba(161, 184, 164, 1)
+  );
+}
+
+dl.inline dt:nth-of-type(4) {
+  background: linear-gradient(
+    to right,
+    rgba(190, 252, 61, 1),
+    rgba(165, 171, 241, 1)
+  );
+}
+
+dl.inline dt:nth-of-type(5) {
+  background: linear-gradient(
+    90deg,
+    rgba(254, 247, 149, 1) 0%,
+    rgba(122, 208, 226, 1) 100%
+  );
+}
+
+dl.inline dt:nth-of-type(6) {
+  background: linear-gradient(
+    to right,
+    rgba(203, 255, 76, 1),
+    rgba(214, 165, 11, 1)
+  );
+}
+
+dl.inline dt:nth-of-type(7) {
+  background: linear-gradient(
+    to right,
+    rgba(248, 212, 83, 1),
+    rgba(255, 93, 91, 1)
+  );
+}
+
+dl.inline dd {
+  display: inline;
+  margin: 0;
+}
+
+dl.inline dd:after {
+  display: block;
+  content: '';
+}
+
+.boxy {
+  display: inline-block;
+  margin: 10pt 0;
+  padding: 4pt;
+  text-align: center;
+  font-size: 2em;
+}
+
+.boxy.build {
+  background: linear-gradient(90deg, #fdbb2d 0%, #22c1c3 100%);
+}
+
+.boxy.abort {
+  background: linear-gradient(90deg, #d53369 0%, #daae51 100%);
+}
+
+.boxy.home {
+  background: linear-gradient(90deg, #f8ff00 0%, #3ad59f 100%);
+}
+
+button,
+a.button {
+  border: none;
+  background-color: lightgray;
+  padding: 2pt 8pt;
+  margin: 0;
+  display: inline-block;
+  text-decoration: none;
+  color: inherit;
+}
+
+a.button {
+  -webkit-appearance: button;
+  -moz-appearance: button;
+  appearance: button;
+}

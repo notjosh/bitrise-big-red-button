@@ -2,4 +2,6 @@
 
 {{block 'content'}}
 <h1>who are you?</h1>
+
+<p>idk who you are, so you'll have to log in to do <em>the thing</em>. please.
 {{/block}}

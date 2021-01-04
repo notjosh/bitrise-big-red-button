@@ -1,7 +1,7 @@
 {{extend './layout.art'}}
 
 {{block 'content'}}
-<div>
+<div class="boxy build">
   <form method="POST" action="/new-build">
     <button type="submit">make a new build</button>
   </form>
