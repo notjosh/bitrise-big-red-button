@@ -28,7 +28,8 @@ const buildForSlug = (buildSlug) => {
 };
 
 fastify.register(require('fastify-helmet'), {
-  contentSecurityPolicy: process.env.NODE_ENV !== 'development',
+  contentSecurityPolicy:
+    process.env.NODE_ENV === 'development' ? false : undefined,
 });
 fastify.register(require('fastify-cookie'));
 fastify.register(require('./src/fastify-auth-cookie-to-bearer'), {
