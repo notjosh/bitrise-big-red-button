@@ -72,6 +72,15 @@ fastify.register(require('point-of-view'), {
     'art-template': require('art-template'),
   },
   templates: 'templates',
+  options: {
+    htmlMinifierOptions: {
+      collapseWhitespace: true,
+      conservativeCollapse: true, // need this, as some of the rule parsing ("{{ }}") breaks whitespace sometimes, for some reason?
+      minifyCSS: true,
+      minifyJS: true,
+      ignoreCustomFragments: [],
+    },
+  },
 });
 
 fastify.addHook('preHandler', function (req, reply, done) {
