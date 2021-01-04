@@ -3,24 +3,13 @@
 {{block 'content'}}
 <h1>build #{{ build.build_number }}</h1>
 <dl class="inline">
-  <dt>status_text</dt>
-  <dd>
-    <em>{{ build.status_text }}</em>
-  </dd>
-  <dt>slug</dt>
-  <dd>
-    <a href="https://app.bitrise.io/build/{{ build.slug }}">{{ build.slug }}</a>
-  </dd>
-  <dt>branch</dt>
-  <dd>{{ build.branch }}</dd>
-  <dt>triggered_workflow</dt>
-  <dd>{{ build.triggered_workflow }}</dd>
-  <dt>status</dt>
-  <dd>{{ build.status }}</dd>
-  <dt>triggered_at</dt>
-  <dd>{{ build.triggered_at }}</dd>
-  <dt>finished_at</dt>
-  <dd>{{ build.finished_at }}</dd>
+  <dt>status_text</dt><dd><em>{{ build.status_text }}</em></dd>
+  <dt>slug</dt><dd><a href="https://app.bitrise.io/build/{{ build.slug }}">{{ build.slug }}</a></dd>
+  <dt>branch</dt><dd>{{ build.branch }}</dd>
+  <dt>triggered_workflow</dt><dd>{{ build.triggered_workflow }}</dd>
+  <dt>status</dt><dd>{{ build.status }}</dd>
+  <dt>triggered_at</dt><dd>{{ build.triggered_at }}</dd>
+  <dt>finished_at</dt><dd>{{ build.finished_at }}</dd>
 </dl>
 
 {{if build.status === 0}}

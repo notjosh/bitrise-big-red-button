@@ -47,7 +47,7 @@ dl.inline dt {
 
 dl.inline dd {
   display: inline;
-  margin: 0;
+  margin: 0 0 0 8pt;
 }
 
 dl.inline dd:after {
